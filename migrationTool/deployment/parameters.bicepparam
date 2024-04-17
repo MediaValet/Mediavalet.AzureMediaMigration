@@ -7,7 +7,7 @@ param mediaAccountRG = 'Whistler'
 // param mediaAccountSubscription = ''
 
 // The storage account where migrated data is written.
-param storageAccountName = 'mvmsustxwhistler'
+param storageAccountName = 'mvmsustxwhistlerfidel'
 param storageAccountRG = 'Whistler'
 // If the storage account is in a different subscription than where the migration is running.
 // param storageAccountSubscription = ''
@@ -23,5 +23,11 @@ param keyvaultRG = 'provenance'
 //additional arguments.
 param arguments = [
   '-t'
-  '\${AssetName}'
+  '\${ContainerName}'
+  '-cs'
+  '2024-01-01'
+  '--skip-migrated'
+  'false'
+  '-b'
+  '3'
 ]
