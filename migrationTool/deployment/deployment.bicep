@@ -34,8 +34,12 @@ param keyvaultSubscription string = subscription().subscriptionId
 @description('Additional command line arguments to pass')
 param arguments array = []
 
+@description('ACR name')
+param acrName string = 'acr6bwurp5ylnjtq'
+
 var tags = {
   name: 'azure-media-migration'
+  owner: 'Core-Platform'
 }
 
 // The identity to create and the roles to assign.
@@ -43,11 +47,16 @@ var identifier = 'azure-media-migration'
 var mediaRoleName =  'Contributor'
 var storageRoleName = 'Storage Blob Data Contributor'
 var keyVaultRoleName = 'Key Vault Secrets Officer'
+var acrUrl = 'acr6bwurp5ylnjtq.azurecr.io'
 
 // Parameters for the container creation.
 var cpus = 4
 var memoryInGB = 16
-var image = 'ghcr.io/azure/azure-media-migration:main'
+var image = '${acrUrl}/azure-media-migration:v0.1'
+
+resource acrResource 'Microsoft.ContainerRegistry/registries@2023-01-01-preview' existing = {
+  name: acrName
+}
 
 resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
   name:  'azure-media-migration-identity'
@@ -157,6 +166,12 @@ resource container 'Microsoft.ContainerInstance/containerGroups@2023-05-01' = {
           }
           command: concat(defaultArguments, arguments, encrypt ? encryptionArguments : [], encrypt ? [ keyVault.properties.vaultUri ] : [])
         }
+      }
+    ]
+    imageRegistryCredentials: [
+      {
+        server: acrResource.properties.loginServer
+        identity: managedIdentity.id
       }
     ]
     osType: 'Linux'
